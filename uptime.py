@@ -11,6 +11,7 @@ import sys
 
 def get_ucos_uptime(task, timeout=30):
     """
+
     """
 
     # initialize error, command and prompt variables
@@ -23,7 +24,7 @@ def get_ucos_uptime(task, timeout=30):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    # get device parameters for connection
+    # get device parameters for connection from task
     device_params = {
         "hostname": task.host.hostname,
         "username": task.host.username,
@@ -32,9 +33,9 @@ def get_ucos_uptime(task, timeout=30):
         "banner_timeout": timeout,
     }
 
-    # not really needed
+    # not really needed, but kept in for consistency...
     if not error:
-        # connect device and handle common errors
+        # connect to device and handle common errors on failure
         try:
             client.connect(**device_params)
         except socket.timeout:
@@ -72,19 +73,28 @@ def get_ucos_uptime(task, timeout=30):
             return result
         except AttributeError:
             result = f"{task.host}: match not found"
-
+    # print and return results
     print(result)
     return result
 
 
 def recv_until_prompt(channel, prompt, timeout, nbytes=65535):
+    # initialize am empty output file
     output = b""
+
+    # loop through up to max count based on "timeout"
     for _ in range(timeout):
+        # check if channel is had content to recieve
         if channel.recv_ready():
+            # if content available recieve and append to output
             output += channel.recv(nbytes)
+            # check if prompt string exists in recieved output
         if prompt in output:
+            # if prompt found return output
             return output
+        # if prompt not found, rest a second then repeat
         time.sleep(1)
+    # if prompt not found in timeout, raise and error
     raise TimeoutError(
         f"timed out in {timeout} seconds without seeing admin prompt:"
         f" \"{prompt.decode('utf-8')}\""
@@ -104,14 +114,18 @@ def parse_uptime(status):
 
 
 def parse_config():
-    yaml_dir = "yamls"
+    # use arg parse to get config details
 
+    # get path dependent on running from python or cx_freeze executable
     if getattr(sys, "frozen", False):
         dirname = os.path.dirname(sys.executable)
     else:
         dirname = os.path.dirname(__file__)
 
+    yaml_dir = "yamls"
+
     parser = argparse.ArgumentParser()
+
     parser.add_argument(
         "-C",
         "--config_file",
@@ -142,9 +156,10 @@ def parse_config():
 
 
 if __name__ == "__main__":
-
+    # get config details
     config = parse_config()
 
+    # initialize nornir object
     nr = InitNornir(
         config_file=config.config_file,
         inventory={
@@ -157,4 +172,5 @@ if __name__ == "__main__":
         },
     )
 
+    # run custom task
     result = nr.run(task=get_ucos_uptime)
