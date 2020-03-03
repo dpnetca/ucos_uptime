@@ -1,0 +1,7 @@
+.venv/
+.vscode/
+__pycache__/
+build/
+yamls/
+nornir.log
+poetry.lock

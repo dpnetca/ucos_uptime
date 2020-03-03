@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "ucm_uptime"
+version = "0.1.0"
+description = "check uptime of one or more UCOS servers"
+authors = ["Denis Pointer"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+nornir = "^2.4.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.7.9"
+black = "^19.10b0"
+bandit = "^1.6.2"
+cx_Freeze = "^6.1"
+pyinstaller = "^3.6"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
