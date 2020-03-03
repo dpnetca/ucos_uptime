@@ -19,7 +19,7 @@ def get_ucos_uptime(task, timeout=30):
     command = "show status\n"
     prompt = b"admin:"
     hostname = f"{task.host}:"
-    result = f"{hostname:<20}"
+    result = f"{hostname: <22}"
     # initialize paramiko SSH client
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -68,11 +68,11 @@ def get_ucos_uptime(task, timeout=30):
         try:
             output = output.decode("utf-8")
             uptime = parse_uptime(output)
-            result = f"{task.host}: {uptime}"
+            result += f"{uptime}"
             print(result)
             return result
         except AttributeError:
-            result = f"{task.host}: match not found"
+            result += "match not found"
     # print and return results
     print(result)
     return result
